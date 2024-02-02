@@ -21,7 +21,9 @@ An optional boolean input `install-node` allows you to choose whether the `actio
           install-node: "false" # optional, defaults to true
 ```
 
-## Example script
+## Example workflow
+This workflow showcases the use of this action to restore the cache from a list of keys.
+
 ```
 name: Test cache
 on:
