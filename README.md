@@ -56,6 +56,8 @@ jobs:
             /tmp/test
           key: pkg2
 
+      - run: rm -rf /tmp/test
+
       - uses: almahmoud/multi-cache-restore-action@main
         name: Multi-cache
         with:
