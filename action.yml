@@ -10,6 +10,9 @@ inputs:
 runs:
   using: "composite"
   steps:
+      - uses: actions/setup-node@v4
+      - name: Install NPM package
+        run: npm install @actions/cache
       - uses: actions/github-script@v7
         name: Artifact script
         with:
