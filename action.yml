@@ -1,5 +1,8 @@
 name: 'Restore cache from a list of keys'
 description: 'Allows restoring cache from a list of keys, which can be programmatically generated in the workflow.'
+branding:
+  icon: 'archive'
+  color: 'purple'
 inputs:
   keys:
     description: "List of keys to restore as a quoted, comma-separated list, eg 'pkg1','pkg2'"
