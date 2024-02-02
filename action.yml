@@ -7,10 +7,16 @@ inputs:
   paths:
     description: "List of paths to restore as a quoted, comma-separated list, eg '/tmp/pkgs','/my/library'"
     required: true
+  install-node:
+    type: boolean
+    description: "Boolean flag for whether to run the `actions/setup-node` action"
+    required: false
+    default: true
 runs:
   using: "composite"
   steps:
       - uses: actions/setup-node@v4
+        if: inputs.install-node
       - name: Install NPM package
         run: npm install @actions/cache
       - uses: actions/github-script@v7
