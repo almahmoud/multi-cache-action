@@ -14,6 +14,13 @@ inputs:
     description: "true/false flag for whether to run the `actions/setup-node` action"
     required: false
     default: 'true'
+outputs:
+  restored-list:
+    description: "List of keys successfully restored"
+    value: ${{ steps.script.outputs.successfulKeys }}
+  failed-list:
+    description: "List of keys failed to restore"
+    value: ${{ steps.script.outputs.failedKeys }}
 runs:
   using: "composite"
   steps:
@@ -23,18 +30,36 @@ runs:
         shell: sh
         run: npm install @actions/cache
       - uses: actions/github-script@v7
-        name: Artifact script
+        id: script
+        name: Restore cache script
         with:
           script: |
             const cache = require('@actions/cache');
+            const core = require('@actions/core');
             const paths = [
                 ${{ inputs.paths }}
             ]
             const keyList = [
                 ${{ inputs.keys }}
             ]
+            
+            const restoreKeys = [];
+
+            const successfulKeys = [];
+            const failedKeys = [];
 
             for (const key of keyList) {
-              const restoreKeys = [];
               const cacheKey = await cache.restoreCache(paths, key, restoreKeys)
+              if (cacheKey) {
+                console.log(`Cache restore successful for key: ${cacheKey}`);
+                successfulKeys.push(cacheKey);
+              } else {
+                console.log(`No cache found for key: ${key}`);
+                failedKeys.push(cacheKey);
+              }        
             }
+
+            const successfulKeysString = successfulKeys.join(',');
+            const failedKeysString = failedKeys.join(',');
+            core.setOutput('successfulKeys', successfulKeysString);
+            core.setOutput('failedKeys', failedKeysString);
