@@ -45,7 +45,7 @@ runs:
 
             for (const each of loopList) {
               const path = `${pathPrefix}/${each}`;
-              const key = `${keyPrefix}/${each}`;
+              const key = `${keyPrefix}-${each}`;
               
               const cacheId = await cache.saveCache([path], key);
 
