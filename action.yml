@@ -31,7 +31,8 @@ runs:
         with:
           script: |
             const cache = require('@actions/cache');
-            const artifact = require('@actions/artifact');
+            const {DefaultArtifactClient} = require('@actions/artifact');
+            const artifact = new DefaultArtifactClient();
 
             const loopList = [
                 ${{ inputs.input-list }}
