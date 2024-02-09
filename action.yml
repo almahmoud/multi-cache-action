@@ -4,61 +4,59 @@ branding:
   icon: 'archive'
   color: 'purple'
 inputs:
-  keys:
-    description: "List of keys to restore as a quoted, comma-separated list, eg 'pkg1','pkg2'"
-    required: true
-  paths:
-    description: "List of paths to restore as a quoted, comma-separated list, eg '/tmp/pkgs','/my/library'"
-    required: true
   install-node:
     description: "true/false flag for whether to run the `actions/setup-node` action"
     required: false
     default: 'true'
-outputs:
-  restored-list:
-    description: "List of keys successfully restored"
-    value: ${{ steps.script.outputs.successfulKeys }}
-  failed-list:
-    description: "List of keys failed to restore"
-    value: ${{ steps.script.outputs.failedKeys }}
+  input-list:
+    description: "List to loop over, as a quoted comma-separated list, eg: `'pkg1','pkg2'`"
+    required: true
+  path-prefix:
+    description: "Prefix for paths to save, prepended to each in the input list"
+    required: true
+  key-prefix:
+    description: "Prefix for keys to save, prepended to each in the input list"
+    required: true
 runs:
   using: "composite"
   steps:
       - uses: actions/setup-node@v4
         if: ${{ inputs.install-node == 'true' }}
-      - name: Install NPM package
+      - name: Install NPM packages
         shell: sh
-        run: npm install @actions/cache
+        run: npm install @actions/cache && npm install @actions/artifact
       - uses: actions/github-script@v7
         id: script
         name: Restore cache script
         with:
           script: |
             const cache = require('@actions/cache');
-            const paths = [
-                ${{ inputs.paths }}
+            const artifact = require('@actions/artifact');
+
+            const loopList = [
+                ${{ inputs.input-list }}
             ]
-            const keyList = [
-                ${{ inputs.keys }}
-            ]
-            
+
+            const pathPrefix = '${{ inputs.path-prefix }}'
+            const keyPrefix = '${{ inputs.key-prefix }}'
             const restoreKeys = [];
 
-            const successfulKeys = [];
-            const failedKeys = [];
 
-            for (const key of keyList) {
-              const cacheKey = await cache.restoreCache(paths, key, restoreKeys)
+            for (const each of loopList) {
+              const path = `${pathPrefix}/${each}`;
+              const key = `${keyPrefix}/${each}`;
+              
+              const cacheId = await cache.saveCache([path], key);
+
               if (cacheKey) {
-                console.log(`Cache restore successful for key: ${cacheKey}`);
-                successfulKeys.push(cacheKey);
+                console.log(`Cache saved cache with id: ${cacheId}`);
               } else {
-                console.log(`No cache found for key: ${key}`);
-                failedKeys.push(cacheKey);
-              }        
+                console.log(`Failed to save cache for key: ${key}`);
+              }
+              const {artId, artSize} = await artifact.uploadArtifact(key,[path])
+              if (artId) {
+                console.log(`Created artifact with id: ${artId} (bytes: ${artSize}`)
+              } else {
+                console.log(`Failed to upload artifact for key: ${key}`);
+              }
             }
-
-            const successfulKeysString = successfulKeys.join(',');
-            const failedKeysString = failedKeys.join(',');
-            core.setOutput('successfulKeys', successfulKeysString);
-            core.setOutput('failedKeys', failedKeysString);
