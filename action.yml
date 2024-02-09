@@ -48,7 +48,7 @@ runs:
               
               const cacheId = await cache.saveCache([path], key);
 
-              if (cacheKey) {
+              if (cacheId) {
                 console.log(`Cache saved cache with id: ${cacheId}`);
               } else {
                 console.log(`Failed to save cache for key: ${key}`);
