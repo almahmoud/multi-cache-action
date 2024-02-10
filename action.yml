@@ -44,7 +44,7 @@ runs:
 
 
             for (const each of loopList) {
-              const path = `${pathPrefix}/${each}/`;
+              const path = `${pathPrefix}/${each}`;
               const key = `${keyPrefix}-${each}`;
               
               const cacheId = await cache.saveCache([path], key);
@@ -54,7 +54,7 @@ runs:
               } else {
                 console.log(`Failed to save cache for key: ${key}`);
               }
-              const {artId, artSize} = await artifact.uploadArtifact(key,[path], { compressionLevel: 0 })
+              const {artId, artSize} = await artifact.uploadArtifact(key,[`${path}.tar.gz`], { compressionLevel: 0 })
               if (artId) {
                 console.log(`Created artifact with id: ${artId} (bytes: ${artSize}`)
               } else {
